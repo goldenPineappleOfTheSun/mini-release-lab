@@ -48,4 +48,6 @@ jobs:
         with:
           name: website
           path: dist/
-        
+  inspect:
+    runs-on: ubuntu-latest
+    needs: hello
