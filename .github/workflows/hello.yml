@@ -37,3 +37,7 @@ jobs:
         env:
           IMAGE_TAG: ${{ steps.generate.outputs.tag }}
         run: echo "Image tag is $IMAGE_TAG"
+      - name: Install dependencies
+        run: npm ci
+      - name: Build Vite
+        run: npm run build
