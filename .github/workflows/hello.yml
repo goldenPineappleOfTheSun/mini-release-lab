@@ -63,3 +63,10 @@ jobs:
         env:
           IMAGE_TAG: ${{ needs.hello.outputs.image_tag }}
         run: echo "Tag from another job is $IMAGE_TAG"
+  docker_build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t mini-release-lab:ci .
