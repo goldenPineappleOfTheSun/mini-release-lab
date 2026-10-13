@@ -69,8 +69,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Build Docker image
-        run: docker build -t mini-release-lab:ci .
-      - name: Verify Docker image
+        env:
+          COMMIT: ${{ github.sha }}
+        run: docker build --build-arg "COMMIT=$COMMIT" -t mini-release-lab:ci .
+      - name: Verify commit label
         run: |
           docker image inspect mini-release-lab:ci \
-            --format 'Image ID: {{.Id}}'
+            --format '{{index .Config.Labels "org.opencontainers.image.revision"}}'
