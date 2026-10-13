@@ -14,3 +14,9 @@ jobs:
           echo "SHA: $GITHUB_SHA"
           echo "Branch: $GITHUB_REF_NAME"
           echo "Actor: $GITHUB_ACTOR"
+      - name: Compare values
+        env:
+          MY_COMMIT: ${{ github.sha }}
+        run: |
+          echo "From GitHub: $GITHUB_SHA"
+          echo "From custom env: $MY_COMMIT"
