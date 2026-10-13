@@ -73,6 +73,10 @@ jobs:
           COMMIT: ${{ github.sha }}
         run: docker build --build-arg "COMMIT=$COMMIT" -t mini-release-lab:ci .
       - name: Verify commit label
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
         run: |
-          docker image inspect mini-release-lab:ci \
-            --format '{{index .Config.Labels "org.opencontainers.image.revision"}}'
+          ACTUAL_SHA=$(docker image inspect mini-release-lab:ci \
+            --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')
+
+          test "$ACTUAL_SHA" = "$EXPECTED_SHA"
