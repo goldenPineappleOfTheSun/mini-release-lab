@@ -9,3 +9,8 @@ jobs:
     steps:
       - name: Say hello
         run: echo "Hello from GitHub Actions"
+      - name: Show GitHub info
+        run: |
+          echo "SHA: $GITHUB_SHA"
+          echo "Branch: $GITHUB_REF_NAME"
+          echo "Actor: $GITHUB_ACTOR"
