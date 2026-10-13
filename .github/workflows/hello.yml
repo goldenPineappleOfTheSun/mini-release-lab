@@ -7,6 +7,10 @@ jobs:
   hello:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: List project files
+        run: ls -la
       - name: Say hello
         run: echo "Hello from GitHub Actions"
       - name: Show GitHub info
@@ -28,7 +32,7 @@ jobs:
         run: echo "Area is $BUILD_AREA"
       - name: Generate tag
         id: generate
-        run: echo "tag=v1.0.0" >> "$GITHUB_OUTPUT"
+        run: echo "tag=sha-${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
       - name: Show tag
         env:
           IMAGE_TAG: ${{ steps.generate.outputs.tag }}
