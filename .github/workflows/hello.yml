@@ -20,3 +20,7 @@ jobs:
         run: |
           echo "From GitHub: $GITHUB_SHA"
           echo "From custom env: $MY_COMMIT"
+      - name: Set environment
+        run: echo "BUILD_AREA=training" >> "$GITHUB_ENV"
+      - name: Read environment
+        run: echo "Area is $BUILD_AREA"
