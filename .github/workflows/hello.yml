@@ -23,6 +23,13 @@ jobs:
       - name: Set environment
         run: |
           echo "BUILD_AREA=training" >> "$GITHUB_ENV"
-          echo "TEST" >> "$GITHUB_ENV"
+          echo "Area immediately: $BUILD_AREA"
       - name: Read environment
         run: echo "Area is $BUILD_AREA"
+      - name: Generate tag
+        id: generate
+        run: echo "tag=v1.0.0" >> "$GITHUB_OUTPUT"
+      - name: Show tag
+        env:
+          IMAGE_TAG: ${{ steps.generate.outputs.tag }}
+        run: echo "Image tag is $IMAGE_TAG"
