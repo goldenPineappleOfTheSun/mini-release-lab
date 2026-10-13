@@ -58,4 +58,4 @@ jobs:
           name: website
           path: downloaded-site
       - name: Inspect downloaded files
-        run: ls -la downloaded-site
+        run: echo ls -la downloaded-site
