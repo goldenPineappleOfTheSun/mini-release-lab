@@ -43,4 +43,9 @@ jobs:
         run: |
           npm run build
           ls -la dist
+      - name: Save website
+        uses: actions/upload-artifact@v4
+        with:
+          name: website
+          path: dist/
         
