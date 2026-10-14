@@ -28,15 +28,15 @@ jobs:
         env:
           IMAGE: ${{ steps.image.outputs.name }}
         run: echo "$IMAGE"
-      - name: Push Docker image
-        env:
-          IMAGE: ${{ steps.image.outputs.name }}
-        run: docker push "$IMAGE:sha-$GITHUB_SHA"
       - name: Build Docker image
         env:
           COMMIT: ${{ github.sha }}
           IMAGE: ${{ steps.image.outputs.name }}
         run: docker build --build-arg "COMMIT=$COMMIT" -t "$IMAGE:sha-$COMMIT" .
+      - name: Push Docker image
+        env:
+          IMAGE: ${{ steps.image.outputs.name }}
+        run: docker push "$IMAGE:sha-$GITHUB_SHA"
       - name: Verify commit label
         env:
           COMMIT: ${{ github.sha }}
