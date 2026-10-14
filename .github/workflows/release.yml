@@ -55,3 +55,12 @@ jobs:
             exit 1
           fi
           echo "Release tag not found: $TARGET"
+      - name: Promote image
+        env:
+          SOURCE: ${{ steps.image.outputs.source }}
+          TARGET: ${{ steps.image.outputs.target }}
+        run: |
+          docker buildx imagetools create \
+            --prefer-index=false \
+            --tag "$TARGET" \
+            "$SOURCE"
