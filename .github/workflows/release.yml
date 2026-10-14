@@ -2,6 +2,15 @@ name: Release
 
 on:
   workflow_dispatch:
+    inputs:
+      source_sha:
+        description: "SHA коммита с готовым Docker-образом"
+        required: true
+        type: string
+      release_tag:
+        description: "Версия релиза, например v1.0.0"
+        required: true
+        type: string
 
 jobs:
   release:
@@ -9,3 +18,10 @@ jobs:
     steps:
       - name: Release started
         run: echo "Release workflow started"
+      - name: Show release inputs
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          echo "Source: $SOURCE_SHA"
+          echo "Version: $RELEASE_TAG"
