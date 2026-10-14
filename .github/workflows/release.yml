@@ -35,11 +35,23 @@ jobs:
         id: image
         env:
           SOURCE_SHA: ${{ inputs.source_sha }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
           OWNER="${GITHUB_REPOSITORY_OWNER,,}"
           IMAGE="ghcr.io/$OWNER/mini-release-lab"
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || exit 1
           echo "source=$IMAGE:sha-$SOURCE_SHA" >> "$GITHUB_OUTPUT"
+          echo "target=$IMAGE:release-$RELEASE_TAG" >> "$GITHUB_OUTPUT"
       - name: Inspect source image
         env:
           SOURCE: ${{ steps.image.outputs.source }}
         run: docker buildx imagetools inspect "$SOURCE"
+      - name: Check release tag
+        env:
+          TARGET: ${{ steps.image.outputs.target }}
+        run: |
+          if docker buildx imagetools inspect "$TARGET" >/dev/null 2>&1; then
+            echo "Release tag already exists: $TARGET"
+            exit 1
+          fi
+          echo "Release tag not found: $TARGET"
