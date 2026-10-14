@@ -3,80 +3,44 @@ name: Hello CI
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
-  hello:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: List project files
-        run: ls -la
-      - name: Say hello
-        run: echo "Hello from GitHub Actions"
-      - name: Show GitHub info
-        run: |
-          echo "SHA: $GITHUB_SHA"
-          echo "Branch: $GITHUB_REF_NAME"
-          echo "Actor: $GITHUB_ACTOR"
-      - name: Compare values
-        env:
-          MY_COMMIT: ${{ github.sha }}
-        run: |
-          echo "From GitHub: $GITHUB_SHA"
-          echo "From custom env: $MY_COMMIT"
-      - name: Set environment
-        run: |
-          echo "BUILD_AREA=training" >> "$GITHUB_ENV"
-          echo "Area immediately: $BUILD_AREA"
-      - name: Read environment
-        run: echo "Area is $BUILD_AREA"
-      - name: Generate tag
-        id: generate
-        run: echo "tag=sha-${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
-      - name: Show tag
-        env:
-          IMAGE_TAG: ${{ steps.generate.outputs.tag }}
-        run: echo "Image tag is $IMAGE_TAG"
-      - name: Install dependencies
-        run: npm ci
-      - name: Build Vite
-        run: |
-          npm run build
-          ls -la dist
-      - name: Save website
-        uses: actions/upload-artifact@v4
-        with:
-          name: website
-          path: dist/
-    outputs:
-      image_tag: ${{ steps.generate.outputs.tag }}
-  inspect:
-    runs-on: ubuntu-latest
-    needs: hello
-    steps:
-      - name: Download website
-        uses: actions/download-artifact@v4
-        with:
-          name: website
-          path: downloaded-site
-      - name: Show image tag
-        env:
-          IMAGE_TAG: ${{ needs.hello.outputs.image_tag }}
-        run: echo "Tag from another job is $IMAGE_TAG"
   docker_build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build Docker image
         env:
           COMMIT: ${{ github.sha }}
-        run: docker build --build-arg "COMMIT=$COMMIT" -t mini-release-lab:ci .
+          IMAGE: ${{ steps.image.outputs.name }}
+        run: docker build --build-arg "COMMIT=$COMMIT" -t "$IMAGE:sha-$COMMIT" .
       - name: Verify commit label
         env:
-          EXPECTED_SHA: ${{ github.sha }}
+          COMMIT: ${{ github.sha }}
+          IMAGE: ${{ steps.image.outputs.name }}
         run: |
-          ACTUAL_SHA=$(docker image inspect mini-release-lab:ci \
-            --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')
-
-          test "$ACTUAL_SHA" = "$EXPECTED_SHA"
+          docker image inspect "$IMAGE:sha-$EXPECTED_SHA" \
+            --format '{{index .Config.Labels "org.opencontainers.image.revision"}}'
+      - name: Generate image name
+        id: image
+        run: |
+          OWNER="${GITHUB_REPOSITORY_OWNER,,}"
+          echo "name=ghcr.io/$OWNER/mini-release-lab" >> "$GITHUB_OUTPUT"
+      - name: Show image name
+        env:
+          IMAGE: ${{ steps.image.outputs.name }}
+        run: echo "$IMAGE"
+      - name: Push Docker image
+        env:
+          IMAGE: ${{ steps.image.outputs.name }}
+        run: docker push "$IMAGE:sha-$GITHUB_SHA"
