@@ -64,3 +64,13 @@ jobs:
             --prefer-index=false \
             --tag "$TARGET" \
             "$SOURCE"
+      - name: Verify release digest
+        env:
+          SOURCE: ${{ steps.image.outputs.source }}
+          TARGET: ${{ steps.image.outputs.target }}
+        run: |
+          SOURCE_DIGEST=$(docker buildx imagetools inspect "$SOURCE" --format '{{.Manifest.Digest}}')
+          TARGET_DIGEST=$(docker buildx imagetools inspect "$TARGET" --format '{{.Manifest.Digest}}')
+          echo "Source: $SOURCE_DIGEST"
+          echo "Target: $TARGET_DIGEST"
+          test "$SOURCE_DIGEST" = "$TARGET_DIGEST"
