@@ -31,3 +31,15 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Prepare image reference
+        id: image
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          OWNER="${GITHUB_REPOSITORY_OWNER,,}"
+          IMAGE="ghcr.io/$OWNER/mini-release-lab"
+          echo "source=$IMAGE:sha-$SOURCE_SHA" >> "$GITHUB_OUTPUT"
+      - name: Inspect source image
+        env:
+          SOURCE: ${{ steps.image.outputs.source }}
+        run: docker buildx imagetools inspect "$SOURCE"
